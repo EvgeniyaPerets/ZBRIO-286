@@ -1,8 +1,11 @@
-import { fireEvent, render, screen } from "@testing-library/react"
+import { fireEvent, getByRole, render, screen } from "@testing-library/react"
 import ProviderWrapper from "./ProviderWrapper";
 import '@testing-library/jest-dom'
 import App from "./App";
-import userEvent from "@testing-library/user-event";
+// import userEvent from "@testing-library/user-event";
+import { v4 } from "uuid";
+import configureStore from 'redux-mock-store'
+import { Provider } from "react-redux";
 
 describe('test app', () => {
   it('app render correctly', () =>{
@@ -40,6 +43,27 @@ describe('test app', () => {
     expect(checkbox).not.toBeChecked()
     fireEvent.click(checkbox)
     expect(checkbox).toBeChecked()
+
+  })
+
+  it('mock state', () => {
+    const initState = [{
+      id: v4(),
+      discription: 'test',
+      completed: false,
+    }]
+    const mockStore = configureStore()
+
+    const store = mockStore(initState)
+    const { asFragment, getAllByRole, getByText } = render(<Provider store={store}><App /></Provider>)
+
+    expect(asFragment(<App />)).toMatchSnapshot()
+
+    const btnEdit = getAllByRole('button')[1]
+    fireEvent.click(btnEdit)
+
+    expect(getByText(/edit item/i)).toBeInTheDocument()
+
 
   })
 })
